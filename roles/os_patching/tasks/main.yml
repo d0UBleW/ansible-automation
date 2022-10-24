@@ -1,0 +1,29 @@
+---
+- name: Upgrade all packages and reboot when necessary
+  block:
+    - name: Running yum update
+      ansible.builtin.yum:
+        name: "*"
+        state: latest
+
+    # - name: Check if a reboot is required
+    #   ansible.builtin.command: "needs-restarting -r"
+    #   register: reboot_required
+    #   failed_when: false
+    #   changed_when: reboot_required.rc | int == 1
+    #   notify: reboot_handler
+
+    - name: Check if a reboot is required
+      ansible.builtin.command: "needs-restarting"
+      register: reboot_required
+      failed_when: false
+      changed_when: reboot_required.stdout_lines | length > 0
+      notify: reboot_handler
+
+  rescue:
+    - name: OS patching -- flush handlers
+      ansible.builtin.meta: flush_handlers
+
+    - name: OS patching -- caught error
+      ansible.builtin.debug:
+        msg: Troubleshoot me

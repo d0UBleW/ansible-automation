@@ -1,0 +1,18 @@
+---
+- name: Grub config
+  block:
+    - name: grub.conf -- Include audit=1 on all kernel lines
+      ansible.builtin.lineinfile:
+        path: /tmp/grub.conf
+        backrefs: true
+        regexp: '(^\s*kernel.*$)'
+        line: '\1 audit=1'
+      # when: dist == "RedHat_6"
+
+  rescue:
+    - name: grub.conf -- flush handlers
+      ansible.builtin.meta: flush_handlers
+
+    - name: grub.conf -- caught error
+      ansible.builtin.debug:
+        msg: Troubleshoot me

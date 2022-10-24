@@ -1,0 +1,65 @@
+---
+- name: Automation
+  hosts: client1
+  become: true
+  gather_facts: false
+  # uncomment this part to enable proxy
+  # environment:
+  #   http_proxy: http://localhost:1337
+  #   https_proxy: https://localhost:1337
+  vars:
+    pkgs_dir: "./packages"
+    dist: "{{ ansible_facts['distribution'] + '_' + ansible_facts['distribution_major_version'] }}"
+    arch: "{{ ansible_facts['architecture'] }}"
+    server_setup: true
+    os_hardening: true
+    os_patching: true
+  tasks:
+    - name: Bootstrap
+      ansible.builtin.import_role:
+        name: bootstrap
+      tags:
+        - always
+        - bootstrap
+
+    - name: Server setup
+      ansible.builtin.include_role:
+        name: server_setup
+        apply:
+          tags: server_setup
+      tags:
+        - server_setup
+        - etc_hosts
+        - ds_agent
+        - tripwire
+        - splunk
+        - fireeye
+        - ocs_agent
+        - cyberark
+        - nagios
+      when: server_setup is true
+
+    - name: OS hardening
+      ansible.builtin.include_role:
+        name: os_hardening
+        apply:
+          tags: os_hardening
+      tags:
+        - os_hardening
+        - sshd_conf
+        - auditd_conf
+        - audit_rules
+        - pam_d
+        - grub_conf
+        - inactive_password
+        - var_log
+      when: os_hardening is true
+
+    - name: OS patching
+      ansible.builtin.include_role:
+        name: os_patching
+        apply:
+          tags: os_patching
+      tags:
+        - os_patching
+      when: os_patching is true

@@ -1,0 +1,3 @@
+---
+password_auth: /etc/pam.d/password-auth
+system_auth: /etc/pam.d/system-auth

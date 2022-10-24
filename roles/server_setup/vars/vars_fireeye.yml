@@ -1,0 +1,2 @@
+---
+fireeye_conf: "{{ pkgs_dir }}/TripWire_March21/agent_config.json"

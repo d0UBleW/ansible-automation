@@ -1,0 +1,50 @@
+---
+- name: sshd_conf
+  tags: sshd_conf
+  ansible.builtin.include_tasks:
+    file: ./sshd_conf.yml
+    apply:
+      tags: sshd_conf
+
+- name: auditd_conf
+  tags: auditd_conf
+  ansible.builtin.include_tasks:
+    file: ./auditd_conf.yml
+    apply:
+      tags: auditd_conf
+
+- name: audit_rules
+  tags: audit_rules
+  ansible.builtin.include_tasks:
+    file: ./audit_rules.yml
+    apply:
+      tags: audit_rules
+
+- name: pam.d
+  tags: pam_d
+  ansible.builtin.include_tasks:
+    file: ./pam_d.yml
+    apply:
+      tags: pam_d
+
+- name: grub.conf
+  tags: grub_conf
+  ansible.builtin.include_tasks:
+    file: ./grub_conf.yml
+    apply:
+      tags: grub_conf
+  when: dist == "RedHat_6"
+
+- name: Inactive password lock
+  tags: inactive_password
+  ansible.builtin.include_tasks:
+    file: ./inactive_password.yml
+    apply:
+      tags: inactive_password
+
+- name: /var/log/
+  tags: var_log
+  ansible.builtin.include_tasks:
+    file: ./var_log.yml
+    apply:
+      tags: var_log

@@ -1,0 +1,24 @@
+---
+- name: Nagios
+  block:
+    - name: Nagios -- include vars
+      ansible.builtin.include_vars:
+        file: vars_nagios.yml
+
+    - name: Nagios -- extract tarball
+      ansible.builtin.unarchive:
+        src: "{{ nagios_tarball }}"
+        dest: "{{ nagios_dest }}"
+
+    - name: Nagios -- start service
+      ansible.builtin.service:
+        name: nagios
+        state: started
+
+  rescue:
+    - name: Nagios -- flush handlers
+      ansible.builtin.meta: flush_handlers
+
+    - name: Nagios -- caught error
+      ansible.builtin.debug:
+        msg: Troubleshoot me

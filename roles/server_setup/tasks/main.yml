@@ -1,0 +1,56 @@
+---
+- name: /etc/hosts
+  tags: etc_hosts
+  ansible.builtin.include_tasks:
+    file: ./etc_hosts.yml
+    apply:
+      tags: etc_hosts
+
+- name: Deep Security (DS)
+  tags: ds_agent
+  ansible.builtin.include_tasks:
+    file: ./ds_agent.yml
+    apply:
+      tags: ds_agent
+
+- name: Splunk
+  tags: splunk
+  ansible.builtin.include_tasks:
+    file: ./splunk.yml
+    apply:
+      tags: splunk
+
+- name: TripWire
+  tags: tripwire
+  ansible.builtin.include_tasks:
+    file: ./tripwire.yml
+    apply:
+      tags: tripwire
+
+- name: FireEye
+  tags: fireeye
+  ansible.builtin.include_tasks:
+    file: ./fireeye.yml
+    apply:
+      tags: fireeye
+
+- name: OCS Agent
+  tags: ocs_agent
+  ansible.builtin.include_tasks:
+    file: ./ocs_agent.yml
+    apply:
+      tags: ocs_agent
+
+- name: CyberArk
+  tags: cyberark
+  ansible.builtin.include_tasks:
+    file: ./cyberark.yml
+    apply:
+      tags: cyberark
+
+- name: Nagios
+  tags: nagios
+  ansible.builtin.include_tasks:
+    file: ./nagios.yml
+    apply:
+      tags: nagios

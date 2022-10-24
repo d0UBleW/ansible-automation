@@ -1,0 +1,38 @@
+---
+- name: TripWire
+  block:
+    - name: Check if config files are present
+      ansible.builtin.stat:
+        path: "{{ item }}"
+      register: tw_conf
+      loop:
+        - /etc/tripwire/metadata.yml
+        - /etc/tripwire/twagent.conf
+        - /etc/tripwire/registration_pre_shared_key.txt
+      loop_control:
+        label: "{{ item }}"
+      failed_when: not tw_conf.stat.exists
+      ignore_errors: true
+
+    - name: Prepare /etc/tripwire/ directory
+      ansible.builtin.command: "mkdir -p /etc/tripwire/"
+
+    - name: Copy itsectool.tgz
+      ansible.builtin.copy:
+        src: /root/packages/TripWire_March21/
+        dest: /tmp/non/
+        remote_src: true
+      when: tw_conf is failed
+
+  rescue:
+    - name: TripWire -- flushing all handlers
+      ansible.builtin.meta: flush_handlers
+
+    - name: TripWire -- Failing
+      ansible.builtin.debug:
+        msg: "Troubleshoot me"
+
+  always:
+    - name: Debug
+      ansible.builtin.debug:
+        msg: tw_confs

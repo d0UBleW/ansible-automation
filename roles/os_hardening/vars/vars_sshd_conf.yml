@@ -1,0 +1,14 @@
+---
+sshd_conf_path: /etc/ssh/sshd_config
+sshd_conf:
+  - key: "Protocol"
+    value: "2"
+
+  - key: "RhostsRSAAuthentication"
+    value: "no"
+
+  - key: "Ciphers"
+    value: "aes128-ctr,aes192-ctr,aes256-ctr"
+
+  - key: "MACs"
+    value: "hmac-sha1,umac-64@openssh.com,hmac-ripemd160"

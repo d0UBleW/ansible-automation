@@ -1,0 +1,8 @@
+---
+auditd_conf_path: /etc/audit/auditd.conf
+auditd_conf:
+  - key: "max_log_file"
+    value: "10"
+
+  - key: "max_log_file_action"
+    value: "keep_logs"

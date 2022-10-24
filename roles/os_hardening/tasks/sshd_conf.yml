@@ -1,0 +1,97 @@
+---
+- name: sshd_conf
+  block:
+    - name: sshd_conf -- include vars
+      ansible.builtin.include_vars:
+        file: vars_sshd_conf.yml
+
+    - name: sshd_conf -- comment wrong config
+      vars:
+        pattern_list:
+          regexp: "({{ exclude_pattern }}{{ include_pattern }})"
+          label: "{{ item.key }} {{ item.value }}"
+
+        esc_key: "{{ item.key | regex_escape() }}"
+        esc_value: "{{ item.value | regex_escape() }}"
+        exclude_pattern: '(?!^#)(?!^{{ esc_key }}\s+{{ esc_value }}(\s*#.*)?$)'
+        include_pattern: '^{{ esc_key }}\b\s*.*$'
+
+      block:
+        - name: sshd_conf -- Building regex pattern to match wrong config
+          ansible.builtin.set_fact:
+            sshd_wrong_conf: "{{ (sshd_wrong_conf | default([])) + [pattern_list] }}"
+          loop: "{{ sshd_conf }}"
+          loop_control:
+            label: "{{ item.key }} {{ item.value }}"
+
+        - name: sshd_conf -- Commenting wrong config
+          ansible.builtin.replace:
+            path: "{{ sshd_conf_path }}"
+            regexp: "{{ item.regexp }}"
+            replace: '# Commented by Ansible\n# \1\n'
+          loop: "{{ sshd_wrong_conf }}"
+          loop_control:
+            label: "{{ item.label }};\n    regexp: {{ item.regexp }}\n"
+
+      rescue:
+        - name: sshd_conf -- flush handlers
+          ansible.builtin.meta: flush_handlers
+
+        - name: sshd_conf -- caught error
+          ansible.builtin.debug:
+            msg: "Troubleshoot me"
+
+    - name: sshd_conf -- writing correct config
+      vars:
+        pattern_list:
+          regexp: '^{{ esc_key }}\s+{{ esc_value }}(\s*#.*)?$'
+          line: "{{ item.key }} {{ item.value }}"
+          label: "{{ item.key }} {{ item.value }}"
+
+        esc_key: "{{ item.key | regex_escape() }}"
+        esc_value: "{{ item.value | regex_escape() }}"
+
+      block:
+        - name: sshd_conf -- building regex pattern to check if configs exist
+          ansible.builtin.set_fact:
+            sshd_check_confs: "{{ (sshd_check_confs | default([])) + [pattern_list] }}"
+          loop: "{{ sshd_conf }}"
+          loop_control:
+            label: "{{ item.key }} {{ item.value }}"
+
+        - name: sshd_conf -- check if configs already exist
+          ansible.builtin.lineinfile:
+            path: "{{ sshd_conf_path }}"
+            regexp: "{{ item.regexp }}"
+            state: absent
+          check_mode: true
+          changed_when: false
+          register: check_out
+          loop: "{{ sshd_check_confs }}"
+          loop_control:
+            label: "{{ item.label }};\n    regexp: {{ item.regexp }}\n"
+
+        - name: sshd_conf -- add missing config
+          when: item.found | int == 0
+          loop: "{{ check_out.results }}"
+          loop_control:
+            label: "{{ item.item.label }}"
+          ansible.builtin.lineinfile:
+            path: "{{ sshd_conf_path }}"
+            line: "{{ item.item.line }}"
+
+      rescue:
+        - name: sshd_conf -- flush handlers
+          ansible.builtin.meta: flush_handlers
+
+        - name: sshd_conf -- caught error
+          ansible.builtin.debug:
+            msg: Troubleshoot me
+
+  rescue:
+    - name: sshd_conf -- flush handlers
+      ansible.builtin.meta: flush_handlers
+
+    - name: sshd_conf -- caught error
+      ansible.builtin.debug:
+        msg: Troubleshoot me
