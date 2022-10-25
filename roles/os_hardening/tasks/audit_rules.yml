@@ -30,6 +30,11 @@
           {{ rules[arch] }}
           {{ rules_out.stdout }}
 
+    - name: audit.rules -- restart service
+      ansible.builtin.service:
+        name: auditd
+        state: restarted
+
   rescue:
     - name: audit.rules -- flush handlers
       ansible.builtin.meta: flush_handlers
