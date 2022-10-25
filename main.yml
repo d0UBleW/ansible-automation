@@ -1,6 +1,6 @@
 ---
 - name: Automation
-  hosts: client1
+  hosts: all
   become: true
   gather_facts: false
   # uncomment this part to enable proxy
@@ -19,7 +19,7 @@
       ansible.builtin.import_role:
         name: bootstrap
       tags:
-        - always
+        # - always
         - bootstrap
 
     - name: Server setup
@@ -37,7 +37,7 @@
         - ocs_agent
         - cyberark
         - nagios
-      when: server_setup is true
+      when: server_setup | bool == true
 
     - name: OS hardening
       ansible.builtin.include_role:
@@ -53,7 +53,7 @@
         - grub_conf
         - inactive_password
         - var_log
-      when: os_hardening is true
+      when: os_hardening | bool == true
 
     - name: OS patching
       ansible.builtin.include_role:
@@ -62,4 +62,4 @@
           tags: os_patching
       tags:
         - os_patching
-      when: os_patching is true
+      when: os_patching | bool == true

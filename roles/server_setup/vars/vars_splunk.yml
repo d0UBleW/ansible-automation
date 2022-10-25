@@ -1,6 +1,6 @@
 ---
 splunk_tgz: "{{ pkgs_dir }}/splunkforwarder-9.0.1-82c987350fde-Linux-x86_64.tgz"
-splunk_base_dir: "/opt/"
+splunk_base_dir: "/opt"
 splunk_bin: "{{ splunk_base_dir.rstrip('/') }}/splunkforwarder/bin/splunk"
 splunk_username: "admin"
 splunk_password: "changeme"

@@ -20,14 +20,16 @@
         - name: Splunk -- Extract tgz file
           ansible.builtin.unarchive:
             src: "{{ splunk_tgz }}"
-            dest: "{{ splunk_base_dir }}"
+            dest: "{{ splunk_base_dir }}/"
             list_files: true
           register: tgz_out
 
         - name: Splunk -- Rename folder to splunkforwarder
-          ansible.builtin.command: "mv /opt/{{ tgz_out.files[0] }} /opt/splunkforwarder/"
+          vars:
+          ansible.builtin.command: "mv {{ splunk_base_dir }}/{{ tgz_out.files[0] }} {{ splunk_base_dir }}/splunkforwarder/"
           register: out
           when: tgz_out.files[0] != "splunkforwarder/"
+          changed_when: true
 
       rescue:
         - name: Splunk -- Flushing all handlers

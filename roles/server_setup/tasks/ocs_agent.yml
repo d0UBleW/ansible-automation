@@ -2,12 +2,16 @@
 - name: OCS Agent
   block:
     - name: OCS Agent -- Check crontab
+      vars:
+        bin:
+          "RedHat_7": /usr/opt/ocs-rhel7/bin/ocsinventory-agent
+          "RedHat_8": /usr/opt/ocs-rhel8/bin/ocsinventory-agent
       ansible.builtin.cron:
         name: "ocs_agent"
         minute: "0"
         hour: "2"
         weekday: "6"
-        job: "/usr/opt/ocs-rhel8/bin/ocsinventory-agent -s=https://MBBASTPRDAPP001.maybank.com.my/ocsinventory --ssl=0 -f"
+        job: "{{ bin[dist] }} -s=https://MBBASTPRDAPP001.maybank.com.my/ocsinventory --ssl=0 -f"
 
   rescue:
     - name: OCS Agent -- flush handlers
