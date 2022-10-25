@@ -1,2 +1,8 @@
 ---
 fireeye_conf: "{{ pkgs_dir }}/TripWire_March21/agent_config.json"
+pkg_name: "xagt-31.28.17-1.el7.x86_64.rpm"
+pkg_src_path: "{{ pkgs_dir }}/{{ pkg_name }}"
+pkg_dst_path: "/tmp/{{ pkg_name }}"
+
+fireeye_base_dir: "/opt"
+fireeye_bin: "{{ fireeye_base_dir }}/fireeye/bin"

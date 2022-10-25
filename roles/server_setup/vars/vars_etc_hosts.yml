@@ -40,28 +40,28 @@ entries:
 
   - ip: 172.31.229.12
     d_names:
-      - secdsapp01
-      - secdsapp01.example.com
+      - SECDSMPRDAPP01
+      - SECDSMPRDAPP01.MAYBANK-MY.MBB.DIR
     insertafter: "{{ ds_header }}"
 
   - ip: 172.31.229.13
     d_names:
-      - secdsapp02
-      - secdsapp02.example.com
+      - SECDSMPRDAPP02
+      - SECDSMPRDAPP02.MAYBANK-MY.MBB.DIR
     insertafter: "{{ ds_header }}"
 
   - ip: 172.31.229.14
     d_names:
-      - secdsapp03
-      - secdsapp03.example.com
+      - SECDSMPRDAPP03
+      - SECDSMPRDAPP03.MAYBANK-MY.MBB.DIR
     insertafter: "{{ ds_header }}"
 
   - ip: 192.168.64.108
     d_names:
-      - ocs.example.com
+      - MBBASTPRDAPP001.maybank.com.my
     insertafter: "{{ ocs_header }}"
 
   - ip: 172.31.229.16
     d_names:
-      - tripwire.example.com
+      - tripwire.maybank.com.my
     insertafter: "{{ tw_header }}"

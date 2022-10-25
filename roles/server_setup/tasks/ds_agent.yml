@@ -51,6 +51,11 @@
       retries: 5
       delay: 5
 
+    - name: DS Agent -- clean up rpm file
+      ansible.builtin.file:
+        path: "{{ pkg_dst_path }}"
+        state: absent
+
   rescue:
     - name: DS Agent -- Flush all handlers
       ansible.builtin.meta: flush_handlers

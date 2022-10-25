@@ -1,18 +1,72 @@
 ---
 - name: FireEye
   block:
-    - name: Dbg
-      ansible.builtin.fail:
-        msg: "pass"
+    - name: FireEye -- include var
+      ansible.builtin.include_vars:
+        file: vars_fireeye.yml
 
-    - name: Start fireeye service
-      ansible.builtin.service:
-        name: xagt
-        state: started
-      register: fireeye_out
-      changed_when: true
+    - name: FireEye -- copy package to remote machine
+      ansible.builtin.copy:
+        src: "{{ pkg_src_path }}"
+        dest: "{{ pkg_dst_path }}"
+        mode: preserve
 
-    - name: Show fireeye status service
-      ansible.builtin.command: "service xagt status"
-      register: fireeye_status
-      changed_when: true
+    - name: FireEye -- install rpm package
+      ansible.builtin.command: "rpm -Uvh {{ pkg_dst_path }}"
+      register: rpm_install_fe
+      failed_when:
+        - rpm_install_fe.rc != 0
+        - '"is already installed" not in rpm_install_fe.stderr'
+      changed_when: rpm_install_fe.rc == 0
+
+    - name: FireEye -- clean up rpm file
+      ansible.builtin.file:
+        path: "{{ pkg_dst_path }}"
+        state: absent
+
+    - name: FireEye -- copy agent_config.json
+      ansible.builtin.copy:
+        src: "{{ pkgs_dir }}/agent_config.json"
+        dest: "{{ fireeye_bin }}/agent_config.json"
+        mode: preserve
+
+    - name: FireEye -- import config file
+      ansible.builtin.command: "{{ fireeye_bin }}/xagt -i {{ fireeye_bin }}/agent_config.json"
+      changed_when: false
+      register: import_out
+      failed_when: '"Success" not in import_out.stdout'
+
+    - name: FireEye -- start service
+      when: import_out is not failed
+      block:
+        - name: FireEye -- Start fireeye service
+          ansible.builtin.service:
+            name: xagt
+            state: started
+          register: fireeye_out
+
+        - name: FireEye -- Verify fireeye status service
+          vars:
+            indicator: "Active: active"
+          ansible.builtin.command: "service xagt status"
+          register: fireeye_status
+          changed_when: false
+          until: indicator in fireeye_status.stdout_lines[2]
+          retries: 5
+          delay: 5
+
+      rescue:
+        - name: FireEye -- flush handlers
+          ansible.builtin.meta: flush_handlers
+
+        - name: FireEye -- caught error
+          ansible.builtin.debug:
+            msg: "Troubleshoot me"
+
+  rescue:
+    - name: FireEye -- flush handlers
+      ansible.builtin.meta: flush_handlers
+
+    - name: FireEye -- caught error
+      ansible.builtin.debug:
+        msg: "Troubleshoot me"

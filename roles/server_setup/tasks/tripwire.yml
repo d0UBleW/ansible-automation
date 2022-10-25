@@ -72,6 +72,8 @@
       ansible.builtin.command: "rpm -qa {{ item.name }}"
       register: tripwire_rpm_out
       changed_when: false
+      failed_when: tripwire_rpm_out.stdout_lines | length == 0
+      ignore_errors: true
       loop: "{{ tripwire_pkgs }}"
       loop_control:
         label: "{{ item.name }}"
@@ -83,7 +85,7 @@
       loop: "{{ tripwire_rpm_out.results }}"
       loop_control:
         label: "{{ item.item.name }}"
-      when: item.stdout_lines | length == 0
+      when: item is failed
       register: rpm_install_tw
       failed_when:
         - rpm_install_tw.rc != 0

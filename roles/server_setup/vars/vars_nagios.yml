@@ -1,3 +1,3 @@
 ---
-nagios_tarball: /root/packages/nagios.tar
+nagios_tarball: "{{ pkgs_dir }}/nagios.tgz"
 nagios_dest: /usr/local/

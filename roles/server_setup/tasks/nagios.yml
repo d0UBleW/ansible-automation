@@ -9,6 +9,7 @@
       ansible.builtin.unarchive:
         src: "{{ nagios_tarball }}"
         dest: "{{ nagios_dest }}"
+        mode: preserve
 
     - name: Nagios -- start service
       ansible.builtin.service:
