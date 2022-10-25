@@ -1,6 +1,5 @@
 ---
-#audit_rules_path: /etc/audit/rules.d/audit.rules
-audit_rules_path: /tmp/yohandi/audit.rules3
+audit_rules_path: /etc/audit/rules.d/audit.rules
 rules_b64: |
   ## First rule - delete all
   -D
