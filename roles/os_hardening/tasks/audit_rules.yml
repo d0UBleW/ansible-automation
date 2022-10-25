@@ -31,9 +31,13 @@
           {{ rules_out.stdout }}
 
     - name: audit.rules -- restart service
-      ansible.builtin.service:
-        name: auditd
-        state: restarted
+      vars:
+        indicator: "Stopping logging: [  OK  ]"
+      ansible.builtin.command: "service auditd restart"
+      register: out
+      until: indicator in out.stdout_lines[0]
+      retries: 5
+      delay: 5
 
   rescue:
     - name: audit.rules -- flush handlers
