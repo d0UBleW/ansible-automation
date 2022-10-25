@@ -36,7 +36,7 @@
       register: reset_out
       failed_when: >
         ("HTTP Status: 200 - OK" not in reset_out.stdout) or
-        (reset_out.rc != 0')
+        (reset_out.rc | int != 0)
       changed_when: false
 
     - name: DS Agent -- Activate ds_agent to DSM
@@ -45,7 +45,7 @@
       failed_when: >
         ("HTTP Status: 200 - OK" not in dsm_out.stdout) or
         ("Command session completed" not in dsm_out.stdout) or
-        (dsm_out.rc != 0')
+        (dsm_out.rc | int != 0)
       changed_when: false
       until: "dsm_out is not failed"
       retries: 5
