@@ -59,7 +59,7 @@
           ansible.builtin.command: "{{ splunk_bin }} enable boot-start -user {{ user }}"
           register: enable_splunk_out
           changed_when: '"Configured as systemd managed service." in enable_splunk_out.stdout'
-          failed_when: 'enable_splunk_out.rc != 0 and "already exists" not in enable_splunk_out.stderr'
+          failed_when: 'enable_splunk_out.rc != 0 and "File exists" not in enable_splunk_out.stderr'
 
         - name: Start splunk
           ansible.builtin.command: "{{ splunk_bin }} start"
