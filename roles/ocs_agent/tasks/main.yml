@@ -1,0 +1,21 @@
+---
+- name: OCS Agent
+  block:
+    - name: Check crontab
+      ansible.builtin.cron:
+        name: "ocs_agent"
+        minute: "0"
+        hour: "2"
+        weekday: "6"
+        job: >
+          {{ ocs_bin[dist] }}
+          -s=https://MBBASTPRDAPP001.maybank.com.my/ocsinventory
+          --ssl=0 -f
+
+  rescue:
+    - name: Flush handlers
+      ansible.builtin.meta: flush_handlers
+
+    - name: Caught error
+      ansible.builtin.debug:
+        msg: Troubleshoot me
