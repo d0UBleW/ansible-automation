@@ -1,0 +1,132 @@
+---
+- name: TripWire
+  block:
+    - name: Check if config files are present
+      ansible.builtin.stat:
+        path: "{{ item }}"
+      register: tw_conf
+      loop: "{{ tripwire_files }}"
+      loop_control:
+        label: "{{ item }}"
+      failed_when: not tw_conf.stat.exists
+      ignore_errors: true
+
+    - name: Extract tgz file
+      ansible.builtin.unarchive:
+        src: "{{ tripwire_tgz }}"
+        dest: "{{ tripwire_base_dir }}/"
+        list_files: true
+      register: tgz_out
+
+    - name: Install TripWire config files
+      when: tw_conf is failed
+      block:
+        - name: Setup folder
+          block:
+            - name: Check if tripwire directory exists
+              ansible.builtin.stat:
+                path: "{{ tripwire_base_dir }}/tripwire/"
+              register: tw_dir
+              ignore_errors: true
+
+            - name: "Prepare {{ tripwire_base_dir}}/tripwire"
+              when: not tw_dir.stat.exists
+              ansible.builtin.command: >
+                "mkdir -p {{ tripwire_base_dir }}/tripwire"
+              changed_when: true
+
+            - name: Copy missing files to tripwire folder
+              vars:
+                tgz_dir: "{{ tgz_out.files[0].rstrip('/') }}"
+                filename: "{{ item.item.split('/')[-1] }}"
+              loop: "{{ tw_conf.results }}"
+              loop_control:
+                label: "{{ item.item }}"
+              when: not item.stat.exists
+              ansible.builtin.copy:
+                src: "{{ tripwire_base_dir }}/{{ tgz_dir }}/{{ filename }}"
+                dest: "{{ item.item }}"
+                remote_src: true
+                mode: preserve
+
+          rescue:
+            - name: Flushing all handlers
+              ansible.builtin.meta: flush_handlers
+
+            - name: Failing
+              ansible.builtin.debug:
+                msg: "Troubleshoot me"
+
+      rescue:
+        - name: Flushing all handlers
+          ansible.builtin.meta: flush_handlers
+
+        - name: Failing
+          ansible.builtin.debug:
+            msg: "Troubleshoot me"
+
+    - name: Check if packages are installed
+      ansible.builtin.command: "rpm -qa {{ item.name }}"
+      register: tripwire_rpm_out
+      changed_when: false
+      failed_when: tripwire_rpm_out.stdout_lines | length == 0
+      ignore_errors: true
+      loop: "{{ tripwire_pkgs }}"
+      loop_control:
+        label: "{{ item.name }}"
+
+    - name: Install missing packages
+      vars:
+        tgz_dir: "{{ tgz_out.files[0].rstrip('/') }}"
+      ansible.builtin.command: >
+        "rpm -Uvh {{ tripwire_base_dir }}/{{ tgz_dir }}/{{ item.item.pkg }}"
+      loop: "{{ tripwire_rpm_out.results }}"
+      loop_control:
+        label: "{{ item.item.name }}"
+      when: item is failed
+      register: rpm_install_tw
+      failed_when:
+        - rpm_install_tw.rc != 0
+        - '"is already installed" not in rpm_install_tw.stderr'
+      changed_when: rpm_install_tw.rc == 0
+
+    - name: Clean up tarball file
+      vars:
+        tgz_dir: "{{ tgz_out.files[0].rstrip('/') }}"
+      ansible.builtin.file:
+        path: "{{ tripwire_base_dir }}/{{ tgz_dir }}/"
+        state: absent
+
+    - name: Service
+      block:
+        - name: Enable service
+          loop: "{{ tripwire_services }}"
+          loop_control:
+            label: "{{ item }}"
+          ansible.builtin.service:
+            name: "{{ item }}"
+            enabled: true
+
+        - name: Start service
+          loop: "{{ tripwire_services }}"
+          loop_control:
+            label: "{{ item }}"
+          ansible.builtin.service:
+            name: "{{ item }}"
+            state: started
+
+      rescue:
+        - name: Flushing all handlers
+          ansible.builtin.meta: flush_handlers
+
+        - name: Failing
+          ansible.builtin.debug:
+            msg: "Troubleshoot me"
+
+  rescue:
+    - name: Flushing all handlers
+      ansible.builtin.meta: flush_handlers
+
+    - name: Failing
+      ansible.builtin.debug:
+        msg: "Troubleshoot me"
