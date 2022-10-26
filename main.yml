@@ -4,7 +4,12 @@
   become: true
   gather_facts: false
   roles:
-    - bootstrap
+    - role: bootstrap
+      # uncomment to enable proxy
+      # vars:
+      #   proxy_env:
+      #     http_proxy: http://localhost:1337
+      #     https_proxy: https://localhost:1337
 
 - name: Server Setup
   hosts: client1
