@@ -24,15 +24,6 @@
       # vars:
       #   etc_hosts_path: /tmp/hosts
 
-    # - role: etc_hosts
-    #   tags: etc_hosts
-    # override variable here
-    # vars:
-    #   etc_hosts_path: /etc/hosts
-
-    # - role: splunk
-    #   tags: splunk
-
 - name: OS Hardening
   hosts: client1
   become: true
