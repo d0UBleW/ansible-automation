@@ -1,0 +1,69 @@
+---
+- name: FireEye
+  block:
+    - name: Copy package to remote machine
+      ansible.builtin.copy:
+        src: "{{ fireeye_pkg }}"
+        dest: "{{ fireeye_pkg_dst_path }}"
+        mode: preserve
+
+    - name: Install rpm package
+      ansible.builtin.command: "rpm -Uvh {{ fireeye_pkg_dst_path }}"
+      register: rpm_install_fe
+      failed_when:
+        - rpm_install_fe.rc != 0
+        - '"is already installed" not in rpm_install_fe.stderr'
+      changed_when: rpm_install_fe.rc == 0
+
+    - name: Clean up rpm file
+      ansible.builtin.file:
+        path: "{{ fireeye_pkg_dst_path }}"
+        state: absent
+
+    - name: Copy agent_config.json
+      ansible.builtin.copy:
+        src: "{{ fireeye_conf }}"
+        dest: "{{ fireeye_bin }}/agent_config.json"
+        mode: preserve
+
+    - name: Import config file
+      ansible.builtin.command: >
+        {{ fireeye_bin }}/xagt -i {{ fireeye_bin }}/agent_config.json
+      changed_when: false
+      register: import_out
+      failed_when: '"Success" not in import_out.stdout'
+
+    - name: Start service
+      when: import_out is not failed
+      block:
+        - name: Start fireeye service
+          ansible.builtin.service:
+            name: xagt
+            state: started
+          register: fireeye_out
+
+        - name: Verify fireeye status service
+          vars:
+            indicator: "Active: active"
+          ansible.builtin.command: "service xagt status"
+          register: fireeye_status
+          changed_when: false
+          until: indicator in fireeye_status.stdout_lines[2]
+          retries: 5
+          delay: 5
+
+      rescue:
+        - name: Flush handlers
+          ansible.builtin.meta: flush_handlers
+
+        - name: Caught error
+          ansible.builtin.debug:
+            msg: "Troubleshoot me"
+
+  rescue:
+    - name: Flush handlers
+      ansible.builtin.meta: flush_handlers
+
+    - name: Caught error
+      ansible.builtin.debug:
+        msg: "Troubleshoot me"
