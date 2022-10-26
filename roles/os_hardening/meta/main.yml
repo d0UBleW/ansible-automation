@@ -1,0 +1,16 @@
+---
+dependencies:
+  - role: sshd
+    tags: sshd
+
+  - role: auditd
+    tags: auditd
+
+  - role: grub
+    tags: grub
+
+  - role: inactive_password_lock
+    tags: inactive_password_lock
+
+  - role: var_log
+    tags: var_log
