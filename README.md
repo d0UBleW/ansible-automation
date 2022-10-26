@@ -236,4 +236,4 @@ Overridable default variables:
 
 ### role defaults vs. vars
 
-Since `defaults` has lower priority than `vars`, if variables are expected to be flexible, depending on the user, than it is advisable to define the variables under `./roles/<role name>/defaults/`.
+Since `defaults` has lower priority than `vars`, if variables are expected to be flexible, depending on the user, then it is advisable to define the variables under `./roles/<role name>/defaults/`.
