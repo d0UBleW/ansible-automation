@@ -224,3 +224,16 @@ Overridable default variables:
 
 - `files`: list of dictionary with these keys, name, owner, group, mode
 - `directory`: list of dictionary with these keys, name, owner, group, mode
+
+## References
+
+- [Ansible roles](https://docs.ansible.com/ansible/latest/user_guide/playbooks_reuse_roles.html)
+- [Separate vars into multiple files in Ansible roles](https://stackoverflow.com/a/51818265/13161912)
+- [Ansible handlers](https://docs.ansible.com/ansible/latest/user_guide/playbooks_handlers.html)
+- [Ansible blocks](https://docs.ansible.com/ansible/latest/user_guide/playbooks_blocks.html)
+
+## Notes
+
+### role defaults vs. vars
+
+Since `defaults` has lower priority than `vars`, if variables are expected to be flexible, depending on the user, than it is advisable to define the variables under `./roles/<role name>/defaults/`.
