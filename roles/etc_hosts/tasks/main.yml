@@ -1,0 +1,103 @@
+---
+- name: /etc/hosts
+  vars:
+    esc_ip: "{{ item.ip | regex_escape() }}"
+  block:
+    - name: Comment faulty entries
+      vars:
+        regexp: "({{ exclude_pattern }}{{ include_pattern }})"
+        label: "{{ item.ip }} {{ item.d_names | join(' ') }}"
+        esc_d_names: "{{ item.d_names | map('regex_escape') | list }}"
+        esc_d_names_1: "{{ esc_d_names | join('\\s+') }}"
+        esc_d_names_2: "{{ esc_d_names | join('|') }}"
+        exclude_pattern: >-
+          (?!^#)(?!^{{ esc_ip }}\s+{{ esc_d_names_1 }}(\s*#.*)?$)
+        include_pattern: >-
+          ^({{ esc_ip }}\D+?|.*\s*\b({{ esc_d_names_2 }})\b).*?$
+      ansible.builtin.replace:
+        path: "{{ etc_hosts_path }}"
+        regexp: "{{ regexp }}"
+        replace: '# Commented by Ansible\n# \1\n'
+      loop: "{{ entries }}"
+      loop_control:
+        label: "{{ label }};\n    regexp: {{ regexp }}\n"
+
+    - name: Comment headers
+      block:
+        - name: Check if comment headers exist
+          ansible.builtin.lineinfile:
+            path: "{{ etc_hosts_path }}"
+            regexp: "{{ item.regexp }}"
+            state: absent
+          check_mode: true
+          changed_when: false
+          register: header_check_out
+          loop: "{{ header_entries }}"
+          loop_control:
+            label: "{{ item.label }};\n    regexp: {{ item.regexp }}\n"
+
+        - name: Add missing comment headers
+          when: item.found | int == 0
+          loop: "{{ header_check_out.results }}"
+          loop_control:
+            label: "{{ item.item.label }}"
+          ansible.builtin.lineinfile:
+            path: "{{ etc_hosts_path }}"
+            line: "{{ item.item.line }}"
+
+      rescue:
+        - name: Flushing all handlers
+          ansible.builtin.meta: flush_handlers
+
+        - name: Caught error in etc_hosts.yml
+          ansible.builtin.debug:
+            msg: "Troubleshoot me"
+
+    - name: Add correct entries
+      block:
+        - name: Check if entry already exists
+          vars:
+            label: "{{ item.ip }} {{ item.d_names | join(' ') }}"
+            regexp: '^{{ esc_ip }}\s+{{ esc_d_names }}(\s*#.*)?$'
+            esc_d_names: >
+              {{ item.d_names | map("regex_escape") | list | join("\s+") }}
+          ansible.builtin.lineinfile:
+            path: "{{ etc_hosts_path }}"
+            regexp: "{{ regexp }}"
+            state: absent
+          check_mode: true
+          changed_when: false
+          register: check_out
+          loop: "{{ entries }}"
+          loop_control:
+            label: "{{ label }};\n    regexp: {{ regexp }}\n"
+
+        - name: Add missing entries
+          vars:
+            entry: "{{ item.item }}"
+            line: "{{ entry.ip }}{{ '    ' }}{{ entry.d_names | join('    ') }}"
+            label: "{{ entry.ip }} {{ entry.d_names | join(' ') }}"
+          when: item.found | int == 0
+          loop: "{{ check_out.results }}"
+          loop_control:
+            label: "{{ label }}"
+          ansible.builtin.lineinfile:
+            path: "{{ etc_hosts_path }}"
+            line: "{{ line }}"
+            insertafter: "{{ entry.insertafter }}"
+
+      rescue:
+        - name: Flushing all handlers
+          ansible.builtin.meta: flush_handlers
+
+        - name: Caught error
+          ansible.builtin.debug:
+            msg: "Troubleshoot me"
+
+  rescue:
+    - name: Flushing all handlers
+      ansible.builtin.meta: flush_handlers
+
+    - name: Caught error
+      ansible.builtin.debug:
+        msg: "Troubleshoot me"
