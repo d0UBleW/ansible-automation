@@ -1,0 +1,26 @@
+---
+directories:
+  - name: /var/log/httpd
+    owner: root
+    group: root
+    mode: "700"
+
+  - name: /var/log/mailman
+    owner: root
+    group: mailman
+    mode: "700"
+
+  - name: /var/log/sa
+    owner: root
+    group: root
+    mode: "700"
+
+  - name: /var/log/samba
+    owner: root
+    group: root
+    mode: "700"
+
+  - name: /var/log/squid
+    owner: squid
+    group: squid
+    mode: "700"

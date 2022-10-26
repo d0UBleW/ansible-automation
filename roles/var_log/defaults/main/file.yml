@@ -1,0 +1,51 @@
+---
+files:
+  - name: /var/log/boot.log
+    owner: root
+    group: root
+    mode: "600"
+
+  - name: /var/log/btmp
+    owner: root
+    group: utmp
+    mode: "600"
+
+  - name: /var/log/cron
+    owner: root
+    group: root
+    mode: "600"
+
+  - name: /var/log/dmesg
+    owner: root
+    group: root
+    mode: "600"
+
+  - name: /var/log/lastlog
+    owner: root
+    group: root
+    mode: "600"
+
+  - name: /var/log/maillog
+    owner: root
+    group: root
+    mode: "600"
+
+  - name: /var/log/messages
+    owner: root
+    group: root
+    mode: "600"
+
+  - name: /var/log/secure
+    owner: root
+    group: root
+    mode: "600"
+
+  - name: /var/log/spooler
+    owner: root
+    group: root
+    mode: "600"
+
+  - name: /var/log/wtmp
+    owner: root
+    group: utmp
+    mode: "660"
