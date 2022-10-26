@@ -1,0 +1,58 @@
+---
+- name: DS Agent
+  block:
+    - name: Check if ds_agent is installed
+      ansible.builtin.command: "rpm -qa ds_agent"
+      register: rpm_query_ds_agent
+      changed_when: false
+      failed_when: rpm_query_ds_agent.stdout_lines | length == 0
+      ignore_errors: true
+
+    - name: Copy ds_agent package to remote machine
+      ansible.builtin.copy:
+        src: "{{ ds_pkgs_dict[dist] }}"
+        dest: "{{ ds_pkg_dst_path }}"
+        mode: preserve
+
+    - name: Install ds_agent
+      ansible.builtin.command: "rpm -Uv {{ ds_pkg_dst_path }}"
+      failed_when:
+        - rpm_install_ds.rc != 0
+        - '"is already installed" not in rpm_install_ds.stderr'
+      changed_when: rpm_install_ds.rc == 0
+      register: rpm_install_ds
+
+    - name: Reset ds_agent config
+      ansible.builtin.command: "/opt/ds_agent/dsa_control -r"
+      register: reset_out
+      failed_when: >
+        ("HTTP Status: 200 - OK" not in reset_out.stdout) or
+        (reset_out.rc | int != 0)
+      changed_when: false
+
+    - name: Activate ds_agent to DSM
+      ansible.builtin.command: >
+        /opt/ds_agent/dsa_control
+        -a dsm://SECDSMPRDAPP01.MAYBANK-MY.MBB.DIR:4120
+      register: dsm_out
+      failed_when: >
+        ("HTTP Status: 200 - OK" not in dsm_out.stdout) or
+        ("Command session completed" not in dsm_out.stdout) or
+        (dsm_out.rc | int != 0)
+      changed_when: false
+      until: "dsm_out is not failed"
+      retries: 5
+      delay: 5
+
+    - name: Clean up rpm file
+      ansible.builtin.file:
+        path: "{{ ds_pkg_dst_path }}"
+        state: absent
+
+  rescue:
+    - name: Flush all handlers
+      ansible.builtin.meta: flush_handlers
+
+    - name: Caught error
+      ansible.builtin.debug:
+        msg: "Troubleshoot me"

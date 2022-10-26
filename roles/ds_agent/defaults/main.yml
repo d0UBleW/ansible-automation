@@ -1,0 +1,11 @@
+---
+os_family: "{{ ansible_facts['distribution'] }}"
+major_version: "{{ ansible_facts['distribution_major_version'] }}"
+dist: "{{ os_family + '_' + major_version }}"
+arch: "{{ ansible_facts['architecture'] }}"
+
+ds_pkgs_dict:
+  RedHat_7: "Agent-PGPCore-RedHat_EL7-12.0.0-1546.x86_64.rpm"
+  RedHat_8: "Agent-PGPCore-RedHat_EL8-12.0.0-1546.x86_64.rpm"
+
+ds_pkg_dst_path: "/tmp/{{ ds_pkgs_dict[dist] }}"
