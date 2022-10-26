@@ -1,5 +1,25 @@
 # ansible-automation
 
+## Usage
+
+For general usage
+
+```sh
+$ ansible-playbook main.yml
+```
+
+To run specific role(s), e.g. /etc/hosts, sshd configuration, server setup, etc., please use `--tags <tag1>,<tag2>,<tag3>` when executing through command line.
+
+Example:
+
+```sh
+# Only run /etc/hosts and sshd configuration
+$ ansible-playbook main.yml --tags etc_hosts,sshd_conf
+
+# Only run splunk and os hardening
+$ ansible-playbook main.yml --tags splunk,os_hardening
+```
+
 ## Roles
 
 ### bootstrap
@@ -204,23 +224,3 @@ Overridable default variables:
 
 - `files`: list of dictionary with these keys, name, owner, group, mode
 - `directory`: list of dictionary with these keys, name, owner, group, mode
-
-## Usage
-
-For general usage
-
-```sh
-$ ansible-playbook main.yml
-```
-
-To run specific role(s), e.g. /etc/hosts, sshd configuration, server setup, etc., please use `--tags <tag1>,<tag2>,<tag3>` when executing through command line.
-
-Example:
-
-```sh
-# Only run /etc/hosts and sshd configuration
-$ ansible-playbook main.yml --tags etc_hosts,sshd_conf
-
-# Only run splunk and os hardening
-$ ansible-playbook main.yml --tags splunk,os_hardening
-```
