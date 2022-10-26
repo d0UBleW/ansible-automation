@@ -1,0 +1,11 @@
+---
+os_family: "{{ ansible_facts['distribution'] }}"
+major_version: "{{ ansible_facts['distribution_major_version'] }}"
+dist: "{{ os_family + '_' + major_version }}"
+arch: "{{ ansible_facts['architecture'] }}"
+
+splunk_responses:
+  "Do you agree with this license?": "y"
+  "Please enter an administrator username:": "{{ splunk_username }}"
+  "Please enter a new password:": "{{ splunk_password }}"
+  "Please confirm new password:": "{{ splunk_password }}"

@@ -7,3 +7,14 @@ arch: "{{ ansible_facts['architecture'] }}"
 ocs_bin:
   RedHat_7: /usr/opt/ocs-rhel7/bin/ocsinventory-agent
   RedHat_8: /usr/opt/ocs-rhel8/bin/ocsinventory-agent
+
+ocs_crontab:
+  - name: "ocs_agent"
+    minute: "0"
+    hour: "2"
+    weekday: "6"
+    user: root
+    job: >
+      {{ ocs_bin[dist] }}
+      -s=https://MBBASTPRDAPP001.maybank.com.my/ocsinventory
+      --ssl=0 -f

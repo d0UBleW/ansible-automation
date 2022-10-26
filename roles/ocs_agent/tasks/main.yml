@@ -3,14 +3,17 @@
   block:
     - name: Check crontab
       ansible.builtin.cron:
-        name: "ocs_agent"
-        minute: "0"
-        hour: "2"
-        weekday: "6"
-        job: >
-          {{ ocs_bin[dist] }}
-          -s=https://MBBASTPRDAPP001.maybank.com.my/ocsinventory
-          --ssl=0 -f
+        name: "{{ item.name }}"
+        minute: "{{ item.minute | default(omit) }}"
+        hour: "{{ item.hour | default(omit) }}"
+        day: "{{ item.day | default(omit) }}"
+        month: "{{ item.month | default(omit) }}"
+        weekday: "{{ item.weekday | default(omit) }}"
+        user: "{{ item.root | default(omit) }}"
+        job: "{{ item.job }}"
+      loop: "{{ ocs_crontab }}"
+      loop_control:
+        label: "{{ item.name }}"
 
   rescue:
     - name: Flush handlers

@@ -1,9 +1,4 @@
 ---
-os_family: "{{ ansible_facts['distribution'] }}"
-major_version: "{{ ansible_facts['distribution_major_version'] }}"
-dist: "{{ os_family + '_' + major_version }}"
-arch: "{{ ansible_facts['architecture'] }}"
-
 fireeye_conf: "agent_config.json"
 fireeye_pkg: "xagt-31.28.17-1.el7.x86_64.rpm"
 fireeye_pkg_dst_path: "/tmp/{{ fireeye_pkg }}"

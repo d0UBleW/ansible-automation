@@ -1,16 +1,6 @@
 ---
-os_family: "{{ ansible_facts['distribution'] }}"
-major_version: "{{ ansible_facts['distribution_major_version'] }}"
-dist: "{{ os_family + '_' + major_version }}"
-arch: "{{ ansible_facts['architecture'] }}"
-
 splunk_tgz: "splunkforwarder-9.0.1-82c987350fde-Linux-x86_64.tgz"
 splunk_base_dir: "/opt"
 splunk_bin: "{{ splunk_base_dir }}/splunkforwarder/bin/splunk"
 splunk_username: "admin"
 splunk_password: "changeme"
-splunk_responses:
-  "Do you agree with this license?": "y"
-  "Please enter an administrator username:": "{{ splunk_username }}"
-  "Please enter a new password:": "{{ splunk_password }}"
-  "Please confirm new password:": "{{ splunk_password }}"
