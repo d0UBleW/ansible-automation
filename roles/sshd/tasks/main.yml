@@ -1,0 +1,65 @@
+---
+- name: sshd_conf
+  vars:
+    esc_key: "{{ item.key | regex_escape() }}"
+    esc_value: "{{ item.value | regex_escape() }}"
+  block:
+    - name: Comment wrong config
+      vars:
+        regexp: "({{ exclude_pattern }}{{ include_pattern }})"
+        label: "{{ item.key }} {{ item.value }}"
+        exclude_pattern: '(?!^#)(?!^{{ esc_key }}\s+{{ esc_value }}(\s*#.*)?$)'
+        include_pattern: '^{{ esc_key }}\b\s*.*$'
+      ansible.builtin.replace:
+        path: "{{ sshd_conf_path }}"
+        regexp: "{{ regexp }}"
+        replace: '# Commented by Ansible\n# \1\n'
+      loop: "{{ sshd_conf }}"
+      loop_control:
+        label: "{{ label }};\n    regexp: {{ regexp }}\n"
+
+    - name: Writing correct config
+      block:
+        - name: Check if configs already exist
+          vars:
+            regexp: '^{{ esc_key }}\s+{{ esc_value }}(\s*#.*)?$'
+            label: "{{ item.key }} {{ item.value }}"
+          ansible.builtin.lineinfile:
+            path: "{{ sshd_conf_path }}"
+            regexp: "{{ regexp }}"
+            state: absent
+          check_mode: true
+          changed_when: false
+          register: check_out
+          loop: "{{ sshd_conf }}"
+          loop_control:
+            label: "{{ label }};\n    regexp: {{ regexp }}\n"
+
+        - name: Add missing config
+          when: item.found | int == 0
+          vars:
+            conf: "{{ item.item }}"
+            label: "{{ conf.key }} {{ conf.value }}"
+            line: "{{ conf.key }} {{ conf.value }}"
+          loop: "{{ check_out.results }}"
+          loop_control:
+            label: "{{ label }}"
+          ansible.builtin.lineinfile:
+            path: "{{ sshd_conf_path }}"
+            line: "{{ line }}"
+
+      rescue:
+        - name: Flush handlers
+          ansible.builtin.meta: flush_handlers
+
+        - name: Caught error
+          ansible.builtin.debug:
+            msg: Troubleshoot me
+
+  rescue:
+    - name: Flush handlers
+      ansible.builtin.meta: flush_handlers
+
+    - name: Caught error
+      ansible.builtin.debug:
+        msg: Troubleshoot me
