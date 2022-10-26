@@ -1,0 +1,2 @@
+---
+arch: "{{ ansible_facts['architecture'] }}"

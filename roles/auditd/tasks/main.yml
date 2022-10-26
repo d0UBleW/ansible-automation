@@ -1,0 +1,8 @@
+---
+- name: auditd.conf
+  ansible.builtin.import_tasks:
+    file: auditd_conf.yml
+
+- name: audit_rules
+  ansible.builtin.import_tasks:
+    file: audit_rules.yml
