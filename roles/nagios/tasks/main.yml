@@ -1,0 +1,21 @@
+---
+- name: Nagios
+  block:
+    - name: Extract tarball
+      ansible.builtin.unarchive:
+        src: "{{ nagios_tarball }}"
+        dest: "{{ nagios_dest }}"
+        mode: preserve
+
+    - name: Start service
+      ansible.builtin.service:
+        name: nagios
+        state: started
+
+  rescue:
+    - name: Flush handlers
+      ansible.builtin.meta: flush_handlers
+
+    - name: Caught error
+      ansible.builtin.debug:
+        msg: Troubleshoot me
