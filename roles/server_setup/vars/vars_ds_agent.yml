@@ -1,9 +1,0 @@
----
-pkgs_dict:
-  RedHat_7: "{{ pkgs_dir }}/Agent-PGPCore-RedHat_EL7-12.0.0-1546.x86_64.rpm"
-  RedHat_8: "{{ pkgs_dir }}/Agent-PGPCore-RedHat_EL8-12.0.0-1546.x86_64.rpm"
-
-pkg_name: "{{ pkgs_dict[dist].split('/')[-1] }}"
-
-pkg_src_path: "{{ pkgs_dict[dist] }}"
-pkg_dst_path: "/tmp/{{ pkg_name }}"

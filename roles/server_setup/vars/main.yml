@@ -1,4 +1,0 @@
----
-# All variables in this file is loaded automatically on role: server_setup
-
-# dist: "{{ ansible_facts['distribution'] + ansible_facts['distribution_major_version'] }}"

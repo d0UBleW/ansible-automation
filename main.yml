@@ -1,65 +1,49 @@
 ---
-- name: Automation
-  hosts: all
+- name: Bootstrap
+  hosts: client1
   become: true
   gather_facts: false
-  # uncomment this part to enable proxy
-  # environment:
-  #   http_proxy: http://localhost:1337
-  #   https_proxy: https://localhost:1337
+  roles:
+    - bootstrap
+
+- name: Server Setup
+  hosts: client1
+  become: true
+  gather_facts: true
   vars:
-    pkgs_dir: "./packages"
-    dist: "{{ ansible_facts['distribution'] + '_' + ansible_facts['distribution_major_version'] }}"
-    arch: "{{ ansible_facts['architecture'] }}"
-    server_setup: true
-    os_hardening: true
-    os_patching: true
-  tasks:
-    - name: Bootstrap
-      ansible.builtin.import_role:
-        name: bootstrap
-      tags:
-        # - always
-        - bootstrap
+    ansible_python_interpreter: /usr/bin/python3
+  roles:
+    - role: server_setup
+      tags: server_setup
+      # override variables down here
+      # vars:
+      #   etc_hosts_path: /tmp/hosts
 
-    - name: Server setup
-      ansible.builtin.include_role:
-        name: server_setup
-        apply:
-          tags: server_setup
-      tags:
-        - server_setup
-        - etc_hosts
-        - ds_agent
-        - tripwire
-        - splunk
-        - fireeye
-        - ocs_agent
-        - cyberark
-        - nagios
-      when: server_setup | bool == true
+    # - role: etc_hosts
+    #   tags: etc_hosts
+    # override variable here
+    # vars:
+    #   etc_hosts_path: /etc/hosts
 
-    - name: OS hardening
-      ansible.builtin.include_role:
-        name: os_hardening
-        apply:
-          tags: os_hardening
-      tags:
-        - os_hardening
-        - sshd_conf
-        - auditd_conf
-        - audit_rules
-        - pam_d
-        - grub_conf
-        - inactive_password
-        - var_log
-      when: os_hardening | bool == true
+    # - role: splunk
+    #   tags: splunk
 
-    - name: OS patching
-      ansible.builtin.include_role:
-        name: os_patching
-        apply:
-          tags: os_patching
-      tags:
-        - os_patching
-      when: os_patching | bool == true
+- name: OS Hardening
+  hosts: client1
+  become: true
+  gather_facts: true
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
+  roles:
+    - role: os_hardening
+      tags: os_hardening
+
+- name: OS Patching
+  hosts: client1
+  become: true
+  gather_facts: true
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
+  roles:
+    - role: os_patching
+      tags: os_patching

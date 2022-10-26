@@ -9,17 +9,19 @@
           - python3-pip
       register: install_out
       changed_when: '"already installed" not in (install_out.results | join("\n"))'
+      # environment: proxy
 
     - name: Install pexpect python library
       ansible.builtin.command: "pip3 install pexpect"
       register: pip3_out
       changed_when: '"Requirement already satisfied: pexpect" not in pip3_out.stdout'
+      # environment: proxy
 
-    - name: Changing ansible python interpreter
-      tags: always
-      ansible.builtin.set_fact:
-        ansible_python_interpreter: "/usr/bin/python3"
-
-    - name: Gathering facts
-      tags: always
-      ansible.builtin.gather_facts:
+    # - name: Changing ansible python interpreter
+    #   tags: always
+    #   ansible.builtin.set_fact:
+    #     ansible_python_interpreter: "/usr/bin/python3"
+    #
+    # - name: Gathering facts
+    #   tags: always
+    #   ansible.builtin.gather_facts:
