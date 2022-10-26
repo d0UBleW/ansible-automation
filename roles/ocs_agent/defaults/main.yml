@@ -1,9 +1,4 @@
 ---
-os_family: "{{ ansible_facts['distribution'] }}"
-major_version: "{{ ansible_facts['distribution_major_version'] }}"
-dist: "{{ os_family + '_' + major_version }}"
-arch: "{{ ansible_facts['architecture'] }}"
-
 ocs_bin:
   RedHat_7: /usr/opt/ocs-rhel7/bin/ocsinventory-agent
   RedHat_8: /usr/opt/ocs-rhel8/bin/ocsinventory-agent
