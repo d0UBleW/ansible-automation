@@ -1,5 +1,2 @@
 ---
-os_family: "{{ ansible_facts['distribution'] }}"
-major_version: "{{ ansible_facts['distribution_major_version'] }}"
-dist: "{{ os_family + '_' + major_version }}"
 grub_conf_path: /boot/grub/grub.conf

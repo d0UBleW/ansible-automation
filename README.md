@@ -1,113 +1,209 @@
-# ansible-automation-mbb
+# ansible-automation
 
-## Features
+## Roles
 
-### Bootstrap
+### bootstrap
 
 The `bootstrap` role prepares the target machine by installing `python3` and `pip3`, which are then used to install `pexpect` python library which is necessary to utilize [`ansible.builtin.expect`](https://docs.ansible.com/ansible/latest/collections/ansible/builtin/expect_module.html) module
 
-After that, set ansible to use `/usr/bin/python3` as the default interpreter and start gathering facts.
+### server_setup
 
-### Server Setup
+Contains dependencies, defined in [`./roles/server_setup/meta/main.yml`](https://github.com/d0UBleW/ansible-automation/blob/main/roles/server_setup/meta/main.yml):
 
-List of components:
+- [etc_hosts](https://github.com/d0UBleW/ansible-automation/tree/main/roles/etc_hosts)
+- [ds_agent](https://github.com/d0UBleW/ansible-automation/tree/main/roles/ds_agent)
+- [tripwire](https://github.com/d0UBleW/ansible-automation/tree/main/roles/tripwire)
+- [splunk](https://github.com/d0UBleW/ansible-automation/tree/main/roles/splunk)
+- [fireeye](https://github.com/d0UBleW/ansible-automation/tree/main/roles/fireeye)
+- [ocs_agent](https://github.com/d0UBleW/ansible-automation/tree/main/roles/ocs_agent)
+- [nagios](https://github.com/d0UBleW/ansible-automation/tree/main/roles/nagios)
 
-- /etc/hosts
-- Deep Security agent
-- TripWire
-- Splunk
-- FireEye
-- OCS agent
-- CyberArk
-- Nagios
+### os_hardening
 
-### OS Hardening
+Contains dependencies, defined in [`./roles/os_hardening/meta/main.yml`](https://github.com/d0UBleW/ansible-automation/blob/main/roles/os_hardening/meta/main.yml):
 
-List of components:
+- [sshd](https://github.com/d0UBleW/ansible-automation/tree/main/roles/sshd)
+- [auditd](https://github.com/d0UBleW/ansible-automation/tree/main/roles/auditd)
+- [grub](https://github.com/d0UBleW/ansible-automation/tree/main/roles/grub)
+- [inactive_password_lock](https://github.com/d0UBleW/ansible-automation/tree/main/roles/inactive_password_lock)
+- [var_log](https://github.com/d0UBleW/ansible-automation/tree/main/roles/var_log)
 
-- sshd configuration
-- auditd configuration
-- audit rules
-- PAM
-- grub configuration
-- inactive password lockout
-- /var/log/ permissions
+### os_patching
 
-### OS Patching
-
-List of components:
+Performs:
 
 - `yum update` and reboot when necessary
 
-## Configuration
+### etc_hosts
 
-### ./main.yml
+Performs:
 
-To enable proxy, uncomment this part inside `./main.yml` and fill in the value:
+- Using provided entries of IP address and domain names:
+  - Comment out faulty entries
+  - Insert missing comment headers
+  - Add missing entries
 
-```yaml
-environment:
-  http_proxy: http://localhost:1337
-  https_proxy: https://localhost:1337
-```
+Overridable default variables:
 
-### Server Setup
+- `etc_hosts_path`: path to `/etc/hosts`
+- `<name>_header`: comment header regex pattern for `<name>` section
+- `header_entries`: list of dictionaries to match header pattern and `line` to replace with
+- `entries`: list of dictionaries which contains IP address, list of domain names (`d_names`), and where to insert the entry
 
-- `pkgs_dir` variable in `main.yml` specifies where packages that are required to be installed on remote machines should be placed locally
+### ds_agent
 
-#### /etc/hosts
+Performs:
 
-`./roles/server_setup/vars/vars_etc_hosts.yml`:
+- `ds_agent` installation check
+- Copy installation package (located on [`./roles/ds_agent/files/`](https://github.com/d0UBleW/ansible-automation/tree/main/roles/ds_agent/files)) to remote machine
+- Install/upgrade `ds_agent`
+- Reset config
+- Activate to DSM
+- Clean up package file(s)
 
-- `entries` variable contains sets of IP address and aliases to be included in `/etc/hosts`
-- `entries['ip']` specifies the IP address
-- `entries['d_names']` specifies the list of aliases to `entries['ip']`
+Overridable default variables:
 
-#### Deep Security Agent
+- `ds_pkgs_dict`: dictionary with key (`<os family>_<major version>`, e.g., `RedHat_7`) and value of the corresponding `rpm` file name
+- `ds_pkg_dst_path`: path to package file in remote machine
 
-`./roles/server_setup/vars/vars_ds_agent.yml`:
+### tripwire
 
-- `pkgs_dict` is a dictionary with `Distro_MajorVersion` as the key and path to package locally as the value
+Performs:
 
-#### Splunk
+- Config files existence
+- Extract TripWire archive file from local ([`./roles/tripwire/files/`](https://github.com/d0UBleW/ansible-automation/tree/main/roles/tripwire/files)) to remote machine
+- Install TripWire config files if not present
+- Packages installation check
+- Installation missing packages
+- Enabling and starting services
 
-`./roles/server_setup/vars/vars_splunk.yml`:
+Overridable default variables:
 
-- `splunk_tgz` specifies the path to splunk file locally
-- `splunk_base_dir` specifies where splunk would be installed on remote machines
-- `splunk_username` specifies the username to be created initially
-- `splunk_password` specifies the password to be created initially
+- `tripwire_tgz`: archive file name (archive need to include a directory), located in role's `files` directory
+- `tripwire_base_dir`: directory where tripwire would be installed on the remote machine (must not end with forward slash)
+- `tripwire_files`: list of TripWire config files
+- `tripwire_pkgs`: list of package name and its rpm file name
+- `tripwire_services`: list of TripWire services
 
-### OS Hardening
+### splunk
 
-#### sshd configuration
+Performs:
 
-`./roles/os_hardening/vars/vars_sshd_conf.yml`:
+- Installation checking
+- Splunk installation
+- Initial account creation
+- Enable splunk to start on boot
+- Start splunk service
+- Set deploy poll
+- Verify service status is running
 
-- `sshd_conf_path` specifies the path to remote config file
-- `sshd_conf` is a dictionary used to describe the necessary configurations
+Overridable default variables:
 
-#### auditd configuration
+- `splunk_tgz`: archive file name located in role's `files` directory
+- `splunk_base_dir`: directory where splunk would be installed remotely (must not end with forward slash)
+- `splunk_bin`: splunk binary file path
+- `splunk_username`: username for initial account creation
+- `splunk_password`: password for initial account creation
 
-`./roles/os_hardening/vars/vars_auditd_conf.yml`:
+### fireeye
 
-- `auditd_conf_path` specifies the path to remote config file
-- `auditd_conf` is a dictionary used to describe the necessary configurations
+Performs:
 
-#### audit rules
+- Copy package to remote machine
+- Install rpm package
+- Clean up rpm file
+- Copy json config file to remote machine
+- Import config file to FireEye
+- Start service and verify its status
 
-`./roles/os_hardening/vars/vars_audit_rules.yml`:
+Overridable default variables:
 
-- `audit_rules_path` specifies the path to remote file
-- `rules_b64` specifies the rule set for `x86_64` machines
-- `rules_b32` specifies the rule set for `x86` machines
+- `fireeye_conf`: json config file
+- `fireeye_pkg`: rpm package file name
+- `fireeye_pkg_dst_path`: path to where package file would be copied to
+- `fireeye_base_dir`: path to where fireeye would be installed remotely (must not end with forward slash)
+- `fireeye_bin`: path to fireeye binary folder
 
-#### /var/log/
+### ocs_agent
 
-`./roles/os_hardening/vars/vars_var_log.yml`:
+Performs:
 
-- `files` contains list of dictionaries that describe file name, owner, group, and mode
-- `directories` contains list of dictionaries that describe directory name, owner, group, and mode
+- Create `crontab` job if not exists
+
+Overridable default variables:
+
+- `ocs_bin`: dictionary with key (`<os family>_<major version>`, e.g., `RedHat_7`) and value of the corresponding binary path
+- `ocs_crontab`: list of dictionaries correspoinding to [`ansible.builtin.cron`](https://docs.ansible.com/ansible/latest/collections/ansible/builtin/cron_module.html) module specification
+
+### nagios
+
+Performs:
+
+- Extract tarball to specified destination on remote machine
+
+Overridable default variables:
+
+- `nagios_tarball`: tarball file name located in [`./roles/nagios/files/`](https://github.com/d0UBleW/ansible-automation/tree/main/roles/nagios/files)
+- `nagios_dest`: path to where nagios would be installed on remote machine (must not end with forward slash)
+
+### sshd
+
+Performs:
+
+- Commenting faulty configuration based on supplied entries
+- Add missing configurations
+
+Overridable default variables:
+
+- `sshd_conf_path`: path to `sshd_config` file
+- `sshd_conf`: desired configurations in list of dictionaries format
+
+### auditd
+
+Performs:
+
+- Commenting faulty configuration based on supplied entries
+- Add missing configurations
+- Overwriting `rules.d/audit.rules` file with desired rules based on remote machine architecture
+
+Overridable default variables:
+
+- `auditd_conf_path`: path to `auditd.conf` file
+- `auditd_conf`: desired configurations in list of dictionaries format
+- `audit_rules_path`: path to `rules.d/audit.rules` file
+- `rules_b64`: ruleset for `x86_64` machine
+- `rules_b32`: ruleset for `x86` machine
+
+### grub
+
+Performs:
+
+- Include `audit=1` on all kernel lines
+
+Overridable default variables:
+
+- `grub_conf_path`: path to `grub.conf` file
+
+### inactive_password_lock
+
+Performs:
+
+- Ensure password lock inactive period is set to desired value
+
+Overridable default variables:
+
+- `period`: number of days of inactivity
+
+### var_log
+
+Performs:
+
+- Ensure correct permissions set to specified files and directories
+
+Overridable default variables:
+
+- `files`: list of dictionary with these keys, name, owner, group, mode
+- `directory`: list of dictionary with these keys, name, owner, group, mode
 
 ## Usage
 
@@ -117,11 +213,7 @@ For general usage
 $ ansible-playbook main.yml
 ```
 
-To only run specific features, please edit the `vars` in `./main.yml` and toggle the boolean values for `server_setup`, `os_hardening`, and `os_patching`.
-
-To skip the `bootstrap` features, comment `tags: always`.
-
-To run specific unit, e.g. /etc/hosts, sshd configuration, etc., please use `--tags <tag1>,<tag2>,<tag3>` when executing through command line.
+To run specific role(s), e.g. /etc/hosts, sshd configuration, server setup, etc., please use `--tags <tag1>,<tag2>,<tag3>` when executing through command line.
 
 Example:
 
