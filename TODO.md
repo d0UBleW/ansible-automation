@@ -3,3 +3,4 @@
 - [ ] review `changed_when` usage
 - [ ] try to use `ansible.builtin.assert` where possible?
 - [ ] use molecule to do testing
+- [ ] review tasks that do checks (change the wording? how to determine the Ansible state (ok, changed, failed)?)
