@@ -1,0 +1,22 @@
+---
+dependencies:
+  - role: etc_hosts
+    tags: etc_hosts
+
+  - role: splunk
+    tags: splunk
+
+  - role: ds_agent
+    tags: ds_agent
+
+  - role: fireeye
+    tags: fireeye
+
+  - role: nagios
+    tags: nagios
+
+  - role: ocs_agent
+    tags: ocs_agent
+
+  - role: tripwire
+    tags: tripwire
