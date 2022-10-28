@@ -1,39 +1,50 @@
 ---
 - name: audit.rules
   block:
-    - name: Delete audit.rules file
-      ansible.builtin.file:
-        path: "{{ audit_rules_path }}"
-        state: absent
-      failed_when: false
-
     - name: Generate rules for SUID and SGID files
       ansible.builtin.shell: >
         find / -xdev \( -perm -4000 -o -perm -2000 \) -type f
         | awk '{print "-a always,exit -F path=" $1 " -F perm=x -F auid>=1000
         -F auid!=4294967295 -k privileged" }'
       register: rules_out
+      changed_when: false
 
-    - name: Create audit.rules file
-      vars:
-        rules:
-          "x86_64": "{{ rules_b64 }}"
-          "x86": "{{ rules_b32 }}"
-      ansible.builtin.blockinfile:
-        create: true
+    - name: Check if rules is already there at rules.d/audit.rules
+      ansible.builtin.replace:
         path: "{{ audit_rules_path }}"
-        block: |
-          {{ rules[arch] }}
-          {{ rules_out.stdout }}
+        regexp: |
+          {{ ruleset[arch] | regex_escape() }}
+          {{ rules_out.stdout | regex_escape() }}
+      check_mode: true
+      changed_when: rule_exists.msg == ""
+      # indicator of existence when rule_exists.msg is not empty
+      register: rule_exists
 
-    - name: Restart service
-      vars:
-        indicator: "Stopping logging: [  OK  ]"
-      ansible.builtin.command: "service auditd restart"
-      register: out
-      until: indicator in out.stdout_lines[0]
-      retries: 5
-      delay: 5
+    - name: Insert rules by overwriting the file
+      when: rule_exists.msg == ""
+      block:
+        - name: Delete audit.rules file
+          ansible.builtin.file:
+            path: "{{ audit_rules_path }}"
+            state: absent
+          failed_when: false
+
+        - name: Create audit.rules file
+          ansible.builtin.blockinfile:
+            create: true
+            path: "{{ audit_rules_path }}"
+            block: |
+              {{ ruleset[arch] }}
+              {{ rules_out.stdout }}
+
+        - name: Restart service
+          vars:
+            indicator: "Stopping logging: [  OK  ]"
+          ansible.builtin.command: "service auditd restart"
+          register: out
+          until: indicator in out.stdout_lines[0]
+          retries: 5
+          delay: 5
 
   rescue:
     - name: Flush handlers

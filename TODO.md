@@ -1,5 +1,5 @@
 - [ ] Ensure Ansible Idempotency
-- [ ] `audit.rules` check if content is the same instead of overwriting every single time
+- [x] `audit.rules` check if content is the same instead of overwriting every single time
 - [ ] review `changed_when` usage
 - [ ] try to use `ansible.builtin.assert` where possible?
 - [ ] use molecule to do testing
