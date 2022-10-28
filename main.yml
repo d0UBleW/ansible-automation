@@ -5,6 +5,7 @@
   gather_facts: false
   roles:
     - role: bootstrap
+      tags: bootstrap
       # uncomment to enable proxy
       # vars:
       #   proxy_env:
