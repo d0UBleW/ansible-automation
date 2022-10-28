@@ -2,12 +2,9 @@
 - name: Splunk
   block:
     - name: Check if splunk is installed
-      ansible.builtin.expect:
-        command: "{{ splunk_bin }} -version --accept-license"
-        responses: "{{ splunk_responses }}"
+      ansible.builtin.file:
+        path: "{{ splunk_bin }}"
       register: check_splunk_out
-      failed_when: check_splunk_out is failed or check_splunk_out.rc != 0
-      changed_when: false
       ignore_errors: true
 
     - name: Install splunk

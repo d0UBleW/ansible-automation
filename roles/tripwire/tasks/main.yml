@@ -17,6 +17,7 @@
         dest: "{{ tripwire_base_dir }}/"
         list_files: true
       register: tgz_out
+      ignore_errors: true
 
     - name: Install TripWire config files
       when: tw_conf is failed

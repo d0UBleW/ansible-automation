@@ -1,11 +1,17 @@
 ---
 - name: DS Agent
   block:
-    - name: Check if ds_agent is installed
+    - name: Running `rpm -qa ds_agent`
       ansible.builtin.command: "rpm -qa ds_agent"
       register: rpm_query_ds_agent
       changed_when: false
-      failed_when: rpm_query_ds_agent.stdout_lines | length == 0
+
+    - name: Check if ds_agent is installed
+      ansible.builtin.assert:
+        that:
+          - rpm_query_ds_agent.stdout_lines | length != 0
+        fail_msg: "ds_agent is not installed"
+        success_msg: "ds_agent is installed"
       ignore_errors: true
 
     - name: Copy ds_agent package to remote machine

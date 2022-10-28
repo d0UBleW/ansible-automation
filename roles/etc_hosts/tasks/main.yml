@@ -30,14 +30,14 @@
             regexp: "{{ item.regexp }}"
             state: absent
           check_mode: true
-          changed_when: false
           register: header_check_out
+          changed_when: header_check_out.found | int == 0
           loop: "{{ header_entries }}"
           loop_control:
             label: "{{ item.label }};\n    regexp: {{ item.regexp }}\n"
 
         - name: Add missing comment headers
-          when: item.found | int == 0
+          when: item is changed
           loop: "{{ header_check_out.results }}"
           loop_control:
             label: "{{ item.item.label }}"
@@ -66,8 +66,8 @@
             regexp: "{{ regexp }}"
             state: absent
           check_mode: true
-          changed_when: false
           register: check_out
+          changed_when: check_out.found | int == 0
           loop: "{{ entries }}"
           loop_control:
             label: "{{ label }};\n    regexp: {{ regexp }}\n"
@@ -77,7 +77,7 @@
             entry: "{{ item.item }}"
             line: "{{ entry.ip }}{{ '    ' }}{{ entry.d_names | join('    ') }}"
             label: "{{ entry.ip }} {{ entry.d_names | join(' ') }}"
-          when: item.found | int == 0
+          when: item is changed
           loop: "{{ check_out.results }}"
           loop_control:
             label: "{{ label }}"

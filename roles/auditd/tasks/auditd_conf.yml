@@ -8,7 +8,8 @@
       vars:
         regexp: "({{ exclude_pattern }}{{ include_pattern }})"
         label: "{{ item.key }} {{ item.value }}"
-        exclude_pattern: '(?!^#)(?!^{{ esc_key }}\s*=\s*{{ esc_value }}(\s*#.*)?$)'
+        exclude_pattern: >-
+          '(?!^#)(?!^{{ esc_key }}\s*=\s*{{ esc_value }}(\s*#.*)?$)'
         include_pattern: '^{{ esc_key }}\b\s*.*$'
       ansible.builtin.replace:
         path: "{{ auditd_conf_path }}"
@@ -29,14 +30,14 @@
             regexp: "{{ regexp }}"
             state: absent
           check_mode: true
-          changed_when: false
           register: check_out
+          changed_when: check_out.found | int == 0
           loop: "{{ auditd_conf }}"
           loop_control:
             label: "{{ label }};\n    regexp: {{ regexp }}\n"
 
         - name: Add missing config
-          when: item.found | int == 0
+          when: item is changed
           vars:
             conf: "{{ item.item }}"
             label: "{{ conf.key }} = {{ conf.value }}"
