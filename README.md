@@ -231,6 +231,7 @@ Overridable default variables:
 - [Separate vars into multiple files in Ansible roles](https://stackoverflow.com/a/51818265/13161912)
 - [Ansible handlers](https://docs.ansible.com/ansible/latest/user_guide/playbooks_handlers.html)
 - [Ansible blocks](https://docs.ansible.com/ansible/latest/user_guide/playbooks_blocks.html)
+- [Ansible idempotency](https://akshayavb99.medium.com/automation-with-ansible-ansibles-idempotence-2c97d3081e6c)
 
 ## Notes
 
