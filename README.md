@@ -14,7 +14,7 @@ Example:
 
 ```sh
 # Only run /etc/hosts and sshd configuration
-$ ansible-playbook site.yml --tags etc_hosts,sshd_conf
+$ ansible-playbook site.yml --tags etc_hosts,sshd
 
 # Only run splunk and os hardening
 $ ansible-playbook site.yml --tags splunk,os_hardening
