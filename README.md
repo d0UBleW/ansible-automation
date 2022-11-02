@@ -20,6 +20,27 @@ $ ansible-playbook site.yml --tags etc_hosts,sshd_conf
 $ ansible-playbook site.yml --tags splunk,os_hardening
 ```
 
+Available tags:
+
+- bootstrap
+- os_hardening
+  - auditd
+    - auditd_conf
+    - audit_rules
+  - grub
+  - inactive_password_lock
+  - sshd
+  - var_log
+- os_patching
+- server_setup
+  - ds_agent
+  - etc_hosts
+  - fireeye
+  - nagios
+  - ocs_agent
+  - splunk
+  - tripwire
+
 ## Roles
 
 ### bootstrap
