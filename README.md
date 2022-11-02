@@ -5,7 +5,7 @@
 For general usage
 
 ```sh
-$ ansible-playbook site.yml
+$ ansible-playbook main.yml
 ```
 
 To run specific role(s), e.g. /etc/hosts, sshd configuration, server setup, etc., please use `--tags <tag1>,<tag2>,<tag3>` when executing through command line.
@@ -14,30 +14,30 @@ Example:
 
 ```sh
 # Only run /etc/hosts and sshd configuration
-$ ansible-playbook site.yml --tags etc_hosts,sshd
+$ ansible-playbook main.yml --tags etc_hosts,sshd
 
 # Only run splunk and os hardening
-$ ansible-playbook site.yml --tags splunk,os_hardening
+$ ansible-playbook main.yml --tags splunk,os_hardening
 ```
 
 Available tags:
 
 - bootstrap
-- os_hardening
+- os\_hardening
   - auditd
-    - auditd_conf
-    - audit_rules
+    - auditd\_conf
+    - audit\_rules
   - grub
-  - inactive_password_lock
+  - inactive\_password\_lock
   - sshd
-  - var_log
-- os_patching
-- server_setup
-  - ds_agent
-  - etc_hosts
+  - var\_log
+- os\_patching
+- server\_setup
+  - ds\_agent
+  - etc\_hosts
   - fireeye
   - nagios
-  - ocs_agent
+  - ocs\_agent
   - splunk
   - tripwire
 
@@ -47,35 +47,35 @@ Available tags:
 
 The `bootstrap` role prepares the target machine by installing `python3` and `pip3`, which are then used to install `pexpect` python library which is necessary to utilize [`ansible.builtin.expect`](https://docs.ansible.com/ansible/latest/collections/ansible/builtin/expect_module.html) module
 
-### server_setup
+### server\_setup
 
 Contains dependencies, defined in [`./roles/server_setup/meta/main.yml`](https://github.com/d0UBleW/ansible-automation/blob/main/roles/server_setup/meta/main.yml):
 
-- [etc_hosts](https://github.com/d0UBleW/ansible-automation/tree/main/roles/etc_hosts)
-- [ds_agent](https://github.com/d0UBleW/ansible-automation/tree/main/roles/ds_agent)
+- [etc\_hosts](https://github.com/d0UBleW/ansible-automation/tree/main/roles/etc_hosts)
+- [ds\_agent](https://github.com/d0UBleW/ansible-automation/tree/main/roles/ds_agent)
 - [tripwire](https://github.com/d0UBleW/ansible-automation/tree/main/roles/tripwire)
 - [splunk](https://github.com/d0UBleW/ansible-automation/tree/main/roles/splunk)
 - [fireeye](https://github.com/d0UBleW/ansible-automation/tree/main/roles/fireeye)
-- [ocs_agent](https://github.com/d0UBleW/ansible-automation/tree/main/roles/ocs_agent)
+- [ocs\_agent](https://github.com/d0UBleW/ansible-automation/tree/main/roles/ocs_agent)
 - [nagios](https://github.com/d0UBleW/ansible-automation/tree/main/roles/nagios)
 
-### os_hardening
+### os\_hardening
 
 Contains dependencies, defined in [`./roles/os_hardening/meta/main.yml`](https://github.com/d0UBleW/ansible-automation/blob/main/roles/os_hardening/meta/main.yml):
 
 - [sshd](https://github.com/d0UBleW/ansible-automation/tree/main/roles/sshd)
 - [auditd](https://github.com/d0UBleW/ansible-automation/tree/main/roles/auditd)
 - [grub](https://github.com/d0UBleW/ansible-automation/tree/main/roles/grub)
-- [inactive_password_lock](https://github.com/d0UBleW/ansible-automation/tree/main/roles/inactive_password_lock)
-- [var_log](https://github.com/d0UBleW/ansible-automation/tree/main/roles/var_log)
+- [inactive\_password\_lock](https://github.com/d0UBleW/ansible-automation/tree/main/roles/inactive_password_lock)
+- [var\_log](https://github.com/d0UBleW/ansible-automation/tree/main/roles/var_log)
 
-### os_patching
+### os\_patching
 
 Performs:
 
 - `yum update` and reboot when necessary
 
-### etc_hosts
+### etc\_hosts
 
 Performs:
 
@@ -91,7 +91,7 @@ Overridable default variables:
 - `header_entries`: list of dictionaries to match header pattern and `line` to replace with
 - `entries`: list of dictionaries which contains IP address, list of domain names (`d_names`), and where to insert the entry
 
-### ds_agent
+### ds\_agent
 
 Performs:
 
@@ -165,7 +165,7 @@ Overridable default variables:
 - `fireeye_base_dir`: path to where fireeye would be installed remotely (must not end with forward slash)
 - `fireeye_bin`: path to fireeye binary folder
 
-### ocs_agent
+### ocs\_agent
 
 Performs:
 
@@ -225,7 +225,7 @@ Overridable default variables:
 
 - `grub_conf_path`: path to `grub.conf` file
 
-### inactive_password_lock
+### inactive\_password\_lock
 
 Performs:
 
@@ -235,7 +235,7 @@ Overridable default variables:
 
 - `period`: number of days of inactivity
 
-### var_log
+### var\_log
 
 Performs:
 
