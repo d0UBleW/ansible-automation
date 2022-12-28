@@ -7,8 +7,25 @@
       register: check_splunk_out
       ignore_errors: true
 
-    - name: Install splunk
-      when: check_splunk_out is failed
+    - name: Get splunk version
+      when: check_splunk_out is not failed
+      block:
+        - name: Stop splunk in case of migration
+          ansible.builtin.command: >
+            {{ splunk_bin }} stop
+          changed_when: false
+
+        - name: Get version
+          ansible.builtin.shell: >
+            {{ splunk_bin }} --accept-license --answer-yes -version |
+              tail -1 |
+              awk '{print $4}' |
+              cut -d'.' -f1
+          register: splunk_version_out
+          changed_when: false
+
+    - name: Install/Update splunk
+      when: check_splunk_out is failed or splunk_version_out.stdout | default(0) | int < 9
       block:
         - name: Extract tgz file
           ansible.builtin.unarchive:
@@ -38,7 +55,7 @@
       block:
         - name: "Create account {{ splunk_username + ':' + splunk_password }}"
           ansible.builtin.expect:
-            command: "{{ splunk_bin }} --accept-license -version"
+            command: "{{ splunk_bin }} --accept-license --answer-yes -version"
             responses: "{{ splunk_responses }}"
           register: create_splunk_out
           changed_when:
@@ -48,6 +65,17 @@
           ansible.builtin.command: "{{ splunk_bin }} stop"
           register: stop_splunk_out
           changed_when: '"splunkd is not running" not in stop_splunk_out.stdout'
+
+        - name: Disable splunk to start on boot
+          vars:
+            changed_indicator: "Disabled."
+          ansible.builtin.command: >
+            {{ splunk_bin }} disable boot-start
+          register: disable_splunk_out
+          changed_when:
+            - changed_indicator in disable_splunk_out.stdout
+          failed_when:
+            - disable_splunk_out.rc != 0
 
         - name: Enable splunk to start on boot
           vars:
