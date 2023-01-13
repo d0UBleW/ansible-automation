@@ -14,7 +14,7 @@
         path: "{{ sshd_conf_path }}"
         regexp: "{{ regexp }}"
         replace: '# Commented by Ansible\n# \1\n'
-      loop: "{{ sshd_conf }}"
+      loop: "{{ sshd_conf[dist] }}"
       loop_control:
         label: "{{ label }};\n    regexp: {{ regexp }}\n"
 
@@ -31,7 +31,7 @@
           check_mode: true
           register: check_out
           changed_when: check_out.found | int == 0
-          loop: "{{ sshd_conf }}"
+          loop: "{{ sshd_conf[dist] }}"
           loop_control:
             label: "{{ label }};\n    regexp: {{ regexp }}\n"
 
@@ -47,6 +47,9 @@
           ansible.builtin.lineinfile:
             path: "{{ sshd_conf_path }}"
             line: "{{ line }}"
+
+        - name: Restart sshd
+          service: name=sshd state=restarted
 
       rescue:
         - name: Flush handlers

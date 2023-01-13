@@ -3,6 +3,7 @@
   hosts: client1
   become: true
   gather_facts: false
+  tags: bootstrap-play
   roles:
     - role: bootstrap
       tags: bootstrap
@@ -18,6 +19,7 @@
   gather_facts: true
   vars:
     ansible_python_interpreter: /usr/bin/python3
+  tags: server-setup-play
   roles:
     - role: server_setup
       tags: server_setup
@@ -31,6 +33,7 @@
   gather_facts: true
   vars:
     ansible_python_interpreter: /usr/bin/python3
+  tags: os-hardening-play
   roles:
     - role: os_hardening
       tags: os_hardening
@@ -41,6 +44,7 @@
   gather_facts: true
   vars:
     ansible_python_interpreter: /usr/bin/python3
+  tags: os-patching-play
   roles:
     - role: os_patching
       tags: os_patching
